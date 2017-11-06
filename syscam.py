@@ -6,6 +6,7 @@ import datetime
 import os
 import shutil
 import sys
+import socket
 
 #sudo stap -e 'probe netfilter.ip.local_out{ printf("%d><%s><%s><%s\n", pid(), daddr, cmdline_str(), data_hex)}'
 def output_info(info, web_opened=False):
