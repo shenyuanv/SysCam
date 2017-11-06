@@ -43,7 +43,7 @@ def read_from_stdin(args):
                 log += ", content={}".format(content)
             output_info(log, args)
             try:
-                shutil.copy2(path, args.path+"/"+ os.path.basepath(path) + hashlib.md5(open(full_path, 'rb').read()).hexdigest())
+                shutil.copy2(path, args.path)
             except:
                 pass
 
