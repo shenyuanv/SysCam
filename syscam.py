@@ -13,13 +13,11 @@ from threading import Thread
 from WebServer import *
 from websocket_server import ThreadedWebsocketServer
 
-def output_info(info, webSocketServer=None):
+def output_info(info, args):
     output = "{}: {}".format(datetime.datetime.now(), info).decode("utf-8", "replace")
     print output
-    if webSocketServer:
-        webSocketServer.send_message_to_all(output)
-    else:
-        print webSocketServer
+    if "websocket_server" in vars(args):
+        args.websocket_server.send_message_to_all(output)
 
 def read_from_stdin(args):
     count = 0
@@ -43,7 +41,7 @@ def read_from_stdin(args):
             if args.content:
                 content = codecs.decode(data_hex, "hex")
                 log += ", content={}".format(content)
-            output_info(log, args.websocket_server)
+            output_info(log, args)
             try:
                 shutil.copy2(path, args.path+"/"+ os.path.basepath(path) + hashlib.md5(open(full_path, 'rb').read()).hexdigest())
             except:
