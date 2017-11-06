@@ -5,13 +5,21 @@ import codecs
 import datetime
 import os
 import shutil
-import sys
 import socket
+import sys
+import hashlib
 
-#sudo stap -e 'probe netfilter.ip.local_out{ printf("%d><%s><%s><%s\n", pid(), daddr, cmdline_str(), data_hex)}'
-def output_info(info, web_opened=False):
-    output = "{}: {}".format(datetime.datetime.now(), info)
+from threading import Thread
+from WebServer import *
+from websocket_server import ThreadedWebsocketServer
+
+def output_info(info, webSocketServer=None):
+    output = "{}: {}".format(datetime.datetime.now(), info).decode("utf-8", "replace")
     print output
+    if webSocketServer:
+        webSocketServer.send_message_to_all(output)
+    else:
+        print webSocketServer
 
 def read_from_stdin(args):
     count = 0
@@ -35,9 +43,9 @@ def read_from_stdin(args):
             if args.content:
                 content = codecs.decode(data_hex, "hex")
                 log += ", content={}".format(content)
-            output_info(log)
+            output_info(log, args.websocket_server)
             try:
-                shutil.copy2(path, args.path)
+                shutil.copy2(path, args.path+"/"+ os.path.basepath(path) + hashlib.md5(open(full_path, 'rb').read()).hexdigest())
             except:
                 pass
 
@@ -61,6 +69,9 @@ def init_args(args):
     if not watch_list:
         print "no watch list specified, monitor all traffic"
     vars(args)["watch_list"] = watch_list
+    if args.web:   
+        vars(args)["web_server"] = WebServer()
+        vars(args)["websocket_server"] = ThreadedWebsocketServer(9001)
     return args
 
 def main():
@@ -68,11 +79,19 @@ def main():
     parser.add_argument("-d", "--domain", nargs="+", help="Evil domain list you would like to monitor.")
     parser.add_argument("-i", "--ip", nargs="+", help="Evil ip list you would like to monitor.")
     parser.add_argument("-t", "--timeout", action="store", type=int, help="Terminate in seconds, set 0 to run forever.")
-    parser.add_argument("-c", "--content", action="store_true", default=False, help="Show message content.")
     parser.add_argument("-p", "--path", action="store", type=str, default="zecops_suspects", help="Dump binary sample to this directory.")
+    parser.add_argument("-c", "--content", action="store_true", default=False, help="Show message content.")
+    parser.add_argument("-w", "--web", action="store_true", default=False, help="Open web interface.")
     args = parser.parse_args(sys.argv[1:])
     args = init_args(args)
-    read_from_stdin(args)
+    if args.web:   
+        args.web_server.start()
+        args.websocket_server.start()
+    try:
+        read_from_stdin(args)
+    except KeyboardInterrupt as e:
+        print "exit"
+        quit()
 
 
 if __name__ == "__main__":
