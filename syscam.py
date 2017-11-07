@@ -12,6 +12,7 @@ import hashlib
 from threading import Thread
 from WebServer import *
 from websocket_server import ThreadedWebsocketServer
+from distutils.spawn import find_executable
 
 def output_info(info, args):
     output = "{}: {}".format(datetime.datetime.now(), info).decode("utf-8", "replace")
@@ -34,7 +35,13 @@ def read_from_stdin(args):
         data_hex = infos[3].strip() if len(infos[3].strip())%2==0 else "0" + infos[3].strip()
         if not args.watch_list or daddr in args.watch_list:
             path_link = "/proc/{}/exe".format(str(pid))
-            path = os.readlink(path_link) if os.path.exists(path_link) else "Unknown"
+            if os.path.exists(path_link):
+                path = os.readlink(path_link)
+            elif find_executable(cmdline.split(" ")[0]):
+                path = find_executable(cmdline.split(" ")[0])
+            else:
+                path = "Unknown"
+
             log = "pid={}, path={}, cmdline={}, connected to {}".format(pid, path, cmdline, daddr)
             if daddr in args.watch_list:
                 log = "pid={}, path={}, cmdline={}, connected to {} ({})".format(pid, path, cmdline, daddr, ",".join(args.watch_list[daddr]))
