@@ -10,15 +10,11 @@ import sys
 import hashlib
 
 from threading import Thread
-from WebServer import *
-from websocket_server import ThreadedWebsocketServer
 from distutils.spawn import find_executable
 
 def output_info(info, args):
     output = "{}: {}".format(datetime.datetime.now(), info).decode("utf-8", "replace")
     print output
-    if "websocket_server" in vars(args):
-        args.websocket_server.send_message_to_all(output)
 
 def read_from_stdin(args):
     count = 0
@@ -74,9 +70,6 @@ def init_args(args):
     if not watch_list:
         print "no watch list specified, monitor all traffic"
     vars(args)["watch_list"] = watch_list
-    if args.web:   
-        vars(args)["web_server"] = WebServer()
-        vars(args)["websocket_server"] = ThreadedWebsocketServer(9001)
     return args
 
 def main():
@@ -86,12 +79,8 @@ def main():
     parser.add_argument("-t", "--timeout", action="store", type=int, help="Terminate in seconds, set 0 to run forever.")
     parser.add_argument("-p", "--path", action="store", type=str, default="zecops_suspects", help="Dump binary sample to this directory.")
     parser.add_argument("-c", "--content", action="store_true", default=False, help="Show message content.")
-    parser.add_argument("-w", "--web", action="store_true", default=False, help="Open web interface.")
     args = parser.parse_args(sys.argv[1:])
     args = init_args(args)
-    if args.web:   
-        args.web_server.start()
-        args.websocket_server.start()
     try:
         read_from_stdin(args)
     except KeyboardInterrupt as e:
