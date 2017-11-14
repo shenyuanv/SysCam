@@ -89,7 +89,7 @@ def init_args(domain_list):
         except Exception: 
             pass
     if os.path.exists(dump_path) and not os.path.isdir(dump_path):
-        print "Dump path {} exists, please change path".format(dump_path)
+        print "Dump path %s exists, please change path" % dump_path
     elif not os.path.exists(dump_path):
         os.mkdir(dump_path)
 
@@ -105,7 +105,6 @@ def init_args(domain_list):
 
 def main():
     watch_list, dns_list = init_args(sys.argv[1:])
-    print dns_list
     try:
         read_from_stdin(watch_list, dns_list)
     except KeyboardInterrupt:
