@@ -29,7 +29,7 @@ def read_from_stdin(watch_list):
         if len(data_hex)%2 != 0:
             data_hex = "0" + data_hex
         if not watch_list or daddr in watch_list:
-            path_link = "/proc/{}/exe".format(str(pid))
+            path_link = "/proc/%s/exe" % pid
             if os.path.exists(path_link):
                 path = os.readlink(path_link)
             elif find_executable(cmdline.split(" ")[0]):
@@ -37,12 +37,12 @@ def read_from_stdin(watch_list):
             else:
                 path = "Unknown"
 
-            log = "pid={}, path={}, cmdline={}, connected to {}".format(pid, path, cmdline, daddr)
+            log = "pid=%s, path=%s, cmdline=%s, connected to %s" % (pid, path, cmdline, daddr)
             if watch_list and daddr in watch_list:
-                log = "pid={}, path={}, cmdline={}, connected to {} ({})".format(pid, path, cmdline, daddr, ",".join(watch_list[daddr]))
+                log = "pid=%s, path=%s, cmdline=%s, connected to %s (%s)" % (pid, path, cmdline, daddr, ",".join(watch_list[daddr]))
             if data_hex:
                 content = codecs.decode(data_hex, "hex")
-                log += ", content={}".format(content)
+                log += ", content=%s" % content
             logging.warning(log)
             try:
                 shutil.copy2(path, dump_path)

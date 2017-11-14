@@ -1,0 +1,22 @@
+INFO:root:no watch list specified, monitor all traffic
+WARNING:root:Illegal info:s
+
+WARNING:root:Illegal info:d
+
+WARNING:root:Illegal info:
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+INFO:root:no watch list specified, monitor all traffic
+WARNING:root:pid=0, path=Unknown, cmdline=test, connected to 127.0.0.1, content=AAA
+WARNING:root:Illegal info:
+
+WARNING:root:Illegal info:
+
+WARNING:root:Illegal info:
