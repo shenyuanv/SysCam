@@ -38,7 +38,7 @@ def read_from_stdin(watch_list):
                 path = "Unknown"
 
             log = "pid={}, path={}, cmdline={}, connected to {}".format(pid, path, cmdline, daddr)
-            if daddr in watch_list:
+            if watch_list and daddr in watch_list:
                 log = "pid={}, path={}, cmdline={}, connected to {} ({})".format(pid, path, cmdline, daddr, ",".join(watch_list[daddr]))
             if data_hex:
                 content = codecs.decode(data_hex, "hex")
