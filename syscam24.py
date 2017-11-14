@@ -57,7 +57,7 @@ def contains_dns(data_str, dns_list):
     return None
 
 def get_path(pid, execname):
-    link_path = "/proc/{}/exe".format(pid)
+    link_path = "/proc/%s/exe" % pid
     path = None
     if os.path.exists(link_path):
         path = os.readlink(link_path)
@@ -105,6 +105,7 @@ def init_args(domain_list):
 
 def main():
     watch_list, dns_list = init_args(sys.argv[1:])
+    print dns_list
     try:
         read_from_stdin(watch_list, dns_list)
     except KeyboardInterrupt:
