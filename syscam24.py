@@ -7,13 +7,14 @@ import shutil
 import socket
 import sys
 import logging
+import struct
 
 from distutils.spawn import find_executable
 
 dump_path = "zecops_suspects"
 
 
-def read_from_stdin(watch_list):
+def read_from_stdin(watch_list, dns_list):
     count = 0
     while True:
         count += 1
@@ -26,34 +27,58 @@ def read_from_stdin(watch_list):
         daddr = infos[1]
         cmdline = infos[2]
         data_hex = infos[3].strip()
+        data_str = None
         if len(data_hex)%2 != 0:
             data_hex = "0" + data_hex
+        data_str = codecs.decode(data_hex, "hex")
         if not watch_list or daddr in watch_list:
-            path_link = "/proc/%s/exe" % pid
-            if os.path.exists(path_link):
-                path = os.readlink(path_link)
-            elif find_executable(cmdline.split(" ")[0]):
-                path = find_executable(cmdline.split(" ")[0])
-            else:
-                path = "Unknown"
-
+            path = get_path(pid, cmdline.split(" ")[0])
             log = "pid=%s, path=%s, cmdline=%s, connected to %s" % (pid, path, cmdline, daddr)
             if watch_list and daddr in watch_list:
                 log = "pid=%s, path=%s, cmdline=%s, connected to %s (%s)" % (pid, path, cmdline, daddr, ",".join(watch_list[daddr]))
-            if data_hex:
-                content = codecs.decode(data_hex, "hex")
-                log += ", content=%s" % content
+            if data_str:
+                log += ", content=%s" % data_str
             logging.warning(log)
-            try:
-                shutil.copy2(path, dump_path)
-            except:
-                pass
+        if dns_list and contains_dns(data_str, dns_list):
+            path = get_path(pid, cmdline.split(" ")[0])
+            log = "pid=%s, path=%s, cmdline=%s, send dns query %s to server %s" % (pid, path, cmdline , contains_dns(data_str, dns_list), daddr)
+            logging.warning(log)
+        try:
+            shutil.copy2(path, dump_path)
+        except:
+            pass
+
+def contains_dns(data_str, dns_list):
+    if not data_str or not data_str.strip():
+        return None
+    for dns in dns_list:
+        if dns in data_str:
+            return dns_list[dns]
+    return None
+
+def get_path(pid, execname):
+    link_path = "/proc/{}/exe".format(pid)
+    path = None
+    if os.path.exists(link_path):
+        path = os.readlink(link_path)
+    else:
+        path = find_executable(execname)
+    return path
+
+def domain2dns(domain):
+    urls = domain.split(".")
+    dns_str = ""
+    for url in urls:
+        dns_str += struct.pack("B", len(url))
+        dns_str += url
+    return dns_str
 
 def init_args(domain_list):
     watch_list = {}
-    if domain_list is None or len(domain_list) < 1:
-        watch_list = None
+    dns_list = {}
     for domain in domain_list:
+        dns_str = domain2dns(domain)
+        dns_list[dns_str] = domain
         try:
             ips = socket.gethostbyname_ex(domain)
             for single_ip in ips[2]:
@@ -76,12 +101,12 @@ def init_args(domain_list):
     rootLogger.addHandler(stHandler)
     if not watch_list:
         logging.info("no watch list specified, monitor all traffic")
-    return watch_list
+    return watch_list, dns_list
 
 def main():
-    watch_list = init_args(sys.argv[1:])
+    watch_list, dns_list = init_args(sys.argv[1:])
     try:
-        read_from_stdin(watch_list)
+        read_from_stdin(watch_list, dns_list)
     except KeyboardInterrupt:
         print "logs saved to ", dump_path
 
