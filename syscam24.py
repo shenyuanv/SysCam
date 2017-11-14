@@ -21,13 +21,14 @@ def read_from_stdin(watch_list, dns_list):
         con = sys.stdin.readline()
         infos = con.split("><")
         if len(infos) != 4:
-            logging.warning("Illegal info:" + con)
+            logging.info("Illegal info:" + con)
             continue
         pid = infos[0]
         daddr = infos[1]
         cmdline = infos[2]
         data_hex = infos[3].strip()
         data_str = None
+        path = None
         if len(data_hex)%2 != 0:
             data_hex = "0" + data_hex
         data_str = codecs.decode(data_hex, "hex")
@@ -43,6 +44,8 @@ def read_from_stdin(watch_list, dns_list):
             path = get_path(pid, cmdline.split(" ")[0])
             log = "pid=%s, path=%s, cmdline=%s, send dns query %s to server %s" % (pid, path, cmdline , contains_dns(data_str, dns_list), daddr)
             logging.warning(log)
+        if not path:
+            continue
         try:
             shutil.copy2(path, dump_path)
         except:
