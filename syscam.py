@@ -87,7 +87,7 @@ def main():
     try:
         read_from_stdin(args)
     except KeyboardInterrupt as e:
-        print "logs saved to ", dump_path
+        print "logs saved to ", args.path
 
 
 if __name__ == "__main__":
