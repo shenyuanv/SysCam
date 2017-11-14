@@ -21,13 +21,14 @@ def read_from_stdin(watch_list, dns_list):
         con = sys.stdin.readline()
         infos = con.split("><")
         if len(infos) != 4:
-            logging.warning("Illegal info:" + con)
+            logging.info("Illegal info:" + con)
             continue
         pid = infos[0]
         daddr = infos[1]
         cmdline = infos[2]
         data_hex = infos[3].strip()
         data_str = None
+        path = None
         if len(data_hex)%2 != 0:
             data_hex = "0" + data_hex
         data_str = codecs.decode(data_hex, "hex")
@@ -43,6 +44,8 @@ def read_from_stdin(watch_list, dns_list):
             path = get_path(pid, cmdline.split(" ")[0])
             log = "pid=%s, path=%s, cmdline=%s, send dns query %s to server %s" % (pid, path, cmdline , contains_dns(data_str, dns_list), daddr)
             logging.warning(log)
+        if not path:
+            continue
         try:
             shutil.copy2(path, dump_path)
         except:
@@ -57,7 +60,7 @@ def contains_dns(data_str, dns_list):
     return None
 
 def get_path(pid, execname):
-    link_path = "/proc/{}/exe".format(pid)
+    link_path = "/proc/%s/exe" % pid
     path = None
     if os.path.exists(link_path):
         path = os.readlink(link_path)
@@ -89,7 +92,7 @@ def init_args(domain_list):
         except Exception: 
             pass
     if os.path.exists(dump_path) and not os.path.isdir(dump_path):
-        print "Dump path {} exists, please change path".format(dump_path)
+        print "Dump path %s exists, please change path" % dump_path
     elif not os.path.exists(dump_path):
         os.mkdir(dump_path)
 
