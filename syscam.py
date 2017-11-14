@@ -7,14 +7,10 @@ import os
 import shutil
 import socket
 import sys
-import hashlib
+import logging
 
-from threading import Thread
 from distutils.spawn import find_executable
 
-def output_info(info, args):
-    output = "{}: {}".format(datetime.datetime.now(), info).decode("utf-8", "replace")
-    print output
 
 def read_from_stdin(args):
     count = 0
@@ -23,7 +19,7 @@ def read_from_stdin(args):
         con = sys.stdin.readline()
         infos = con.split("><")
         if len(infos) != 4:
-            print "error in: " + con
+            logging.warning("Illegal info:" + con)
             continue
         pid = infos[0]
         daddr = infos[1]
@@ -44,7 +40,7 @@ def read_from_stdin(args):
             if args.content:
                 content = codecs.decode(data_hex, "hex")
                 log += ", content={}".format(content)
-            output_info(log, args)
+            logging.warning(log)
             try:
                 shutil.copy2(path, args.path)
             except:
@@ -67,8 +63,15 @@ def init_args(args):
         print "Dump path {} exists, please change path".format(args.path)
     elif not os.path.exists(args.path):
         os.mkdir(args.path)
+
+    logging.basicConfig(filename=args.path + "/connections.log", level=logging.INFO)
+    rootLogger = logging.getLogger()
+    stHandler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    stHandler.setFormatter(formatter)
+    rootLogger.addHandler(stHandler)
     if not watch_list:
-        print "no watch list specified, monitor all traffic"
+        logging.info("no watch list specified, monitor all traffic")
     vars(args)["watch_list"] = watch_list
     return args
 
@@ -84,8 +87,7 @@ def main():
     try:
         read_from_stdin(args)
     except KeyboardInterrupt as e:
-        print "exit"
-        quit()
+        print "logs saved to ", dump_path
 
 
 if __name__ == "__main__":
