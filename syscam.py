@@ -37,7 +37,7 @@ def read_from_stdin(args):
             log = "pid={}, path={}, cmdline={}, connected to {}".format(pid, path, cmdline, daddr)
             if daddr in args.watch_list:
                 log = "pid={}, path={}, cmdline={}, connected to {} ({})".format(pid, path, cmdline, daddr, ",".join(args.watch_list[daddr]))
-            if args.content:
+            if data_hex:
                 content = codecs.decode(data_hex, "hex")
                 log += ", content={}".format(content)
             logging.warning(log)
