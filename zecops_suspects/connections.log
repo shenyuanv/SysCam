@@ -1,22 +1,7 @@
-INFO:root:no watch list specified, monitor all traffic
-WARNING:root:Illegal info:s
-
-WARNING:root:Illegal info:d
-
-WARNING:root:Illegal info:
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-INFO:root:no watch list specified, monitor all traffic
-WARNING:root:pid=0, path=Unknown, cmdline=test, connected to 127.0.0.1, content=AAA
-WARNING:root:Illegal info:
-
-WARNING:root:Illegal info:
-
-WARNING:root:Illegal info:
+WARNING:root:{"daddr": "208.91.196.40", "path": "/bin/ping", "domain": ["www.exampie.com"], "pid": "40951", "cmdline": "ping www.exampie.com"}
+WARNING:root:{"daddr": "208.91.196.40", "path": "/lib/systemd/systemd-resolved", "domain": ["www.exampie.com"], "pid": "890", "cmdline": "/lib/systemd/systemd-resolved"}
+WARNING:root:{"daddr": "208.91.196.40", "path": null, "domain": ["www.exampie.com"], "pid": "0", "cmdline": ""}
+WARNING:root:{"daddr": "208.91.196.40", "path": "/lib/systemd/systemd-resolved", "domain": ["www.exampie.com"], "pid": "890", "cmdline": "/lib/systemd/systemd-resolved"}
+WARNING:root:{"daddr": "208.91.196.40", "path": "/lib/systemd/systemd-resolved", "domain": ["www.exampie.com"], "pid": "890", "cmdline": "/lib/systemd/systemd-resolved"}
+WARNING:root:{"daddr": "208.91.196.40", "path": null, "domain": ["www.exampie.com"], "pid": "0", "cmdline": ""}
+WARNING:root:{"daddr": "208.91.196.40", "path": "/bin/ping", "domain": ["www.exampie.com"], "pid": "40951", "cmdline": "ping www.exampie.com"}

@@ -8,6 +8,7 @@ import socket
 import sys
 import logging
 import struct
+import json
 
 from distutils.spawn import find_executable
 
@@ -21,7 +22,7 @@ def read_from_stdin(watch_list, dns_list):
         con = sys.stdin.readline()
         infos = con.split("><")
         if len(infos) != 4:
-            logging.info("Illegal info:" + con)
+            #logging.info("Illegal info:" + con)
             continue
         pid = infos[0]
         daddr = infos[1]
@@ -32,24 +33,23 @@ def read_from_stdin(watch_list, dns_list):
         if len(data_hex)%2 != 0:
             data_hex = "0" + data_hex
         data_str = codecs.decode(data_hex, "hex")
-        if not watch_list or daddr in watch_list:
-            path = get_path(pid, cmdline.split(" ")[0])
-            log = "pid=%s, path=%s, cmdline=%s, connected to %s" % (pid, path, cmdline, daddr)
-            if watch_list and daddr in watch_list:
-                log = "pid=%s, path=%s, cmdline=%s, connected to %s (%s)" % (pid, path, cmdline, daddr, ",".join(watch_list[daddr]))
-            if data_str:
-                log += ", content=%s" % data_str
-            logging.warning(log)
+        now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        log_json = {"time":now}
+        path = get_path(pid, cmdline.split(" ")[0])
+        if not watch_list:
+            log_json = {"pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr}
+        if watch_list and daddr in watch_list:
+            log_json = {"pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr, "domain":watch_list[daddr]}            
         if dns_list and contains_dns(data_str, dns_list):
-            path = get_path(pid, cmdline.split(" ")[0])
-            log = "pid=%s, path=%s, cmdline=%s, send dns query %s to server %s" % (pid, path, cmdline , contains_dns(data_str, dns_list), daddr)
-            logging.warning(log)
-        if not path:
-            continue
-        try:
-            shutil.copy2(path, dump_path)
-        except:
-            pass
+            log_json = {"pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr, "dns":contains_dns(data_str, dns_list)}    
+        if "pid" in log_json:
+            logging.warning(json.dumps(log_json))
+            if not path:
+                continue
+            try:
+                shutil.copy2(path, dump_path)
+            except:
+                pass
 
 def contains_dns(data_str, dns_list):
     if not data_str or not data_str.strip():
@@ -99,7 +99,7 @@ def init_args(domain_list):
     logging.basicConfig(filename=dump_path + "/connections.log", level=logging.INFO)
     rootLogger = logging.getLogger()
     stHandler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(message)s')
     stHandler.setFormatter(formatter)
     rootLogger.addHandler(stHandler)
     if not watch_list:
