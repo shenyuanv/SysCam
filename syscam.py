@@ -9,6 +9,7 @@ import sys
 import logging
 import struct
 import json
+import shutil
 
 from distutils.spawn import find_executable
 
@@ -38,18 +39,18 @@ def read_from_stdin(watch_list, dns_list):
         log_json = None
         if not watch_list or daddr in watch_list:
             log_json = {"time":now, "pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr}
-        if watch_list and daddr in watch_list:
-            log_json["domain"] = watch_list[daddr]         
-        if dns_list and contains_dns(data_str, dns_list):
-            log_json["dns"] = contains_dns(data_str, dns_list)  
-        if log_json and "pid" in log_json:
-            logging.warning(json.dumps(log_json))
-            if not path:
-                continue
-            try:
-                shutil.copy2(path, dump_path)
-            except:
-                pass
+            if watch_list and daddr in watch_list:
+                log_json["domain"] = watch_list[daddr]         
+            if dns_list and contains_dns(data_str, dns_list):
+                log_json["dns"] = contains_dns(data_str, dns_list)  
+            if log_json and "pid" in log_json:
+                logging.warning(json.dumps(log_json))
+                if not path:
+                    continue
+                try:
+                    shutil.copy2(path, dump_path)
+                except:
+                    pass
 
 def contains_dns(data_str, dns_list):
     if not data_str or not data_str.strip():
@@ -112,6 +113,7 @@ def main():
         read_from_stdin(watch_list, dns_list)
     except KeyboardInterrupt:
         print "logs saved to ", dump_path
+        shutil.make_archive(dump_path, "zip", dump_path)
 
 
 if __name__ == "__main__":
