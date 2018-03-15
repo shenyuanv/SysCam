@@ -34,15 +34,15 @@ def read_from_stdin(watch_list, dns_list):
             data_hex = "0" + data_hex
         data_str = codecs.decode(data_hex, "hex")
         now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        log_json = {"time":now}
         path = get_path(pid, cmdline.split(" ")[0])
-        if not watch_list:
-            log_json = {"pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr}
+        log_json = None
+        if not watch_list or daddr in watch_list:
+            log_json = {"time":now, "pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr}
         if watch_list and daddr in watch_list:
-            log_json = {"pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr, "domain":watch_list[daddr]}            
+            log_json["domain"] = watch_list[daddr]         
         if dns_list and contains_dns(data_str, dns_list):
-            log_json = {"pid":pid, "path":path, "cmdline":cmdline, "daddr":daddr, "dns":contains_dns(data_str, dns_list)}    
-        if "pid" in log_json:
+            log_json["dns"] = contains_dns(data_str, dns_list)  
+        if log_json and "pid" in log_json:
             logging.warning(json.dumps(log_json))
             if not path:
                 continue
